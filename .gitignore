@@ -1,0 +1,6 @@
+gan/
+weights/*
+data/*
+prev/
+GaitDatasetB-silh.zip
+GaitDatasetB-silh/
