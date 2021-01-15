@@ -138,5 +138,54 @@ def fetch_p_vec(key_poses,K,A_i,avg_i):
         PK.append(len(indicies)/len(key_poses))
     return np.asarray(PEI), np.asarray(PK)
 
-def fetch_data():
-    pass
+def fetch_data(subject=0,angle=90,noFrame=False):
+    subject = str(subject)
+    while len(subject)<3:
+        subject = '0'+subject
+    angle = str(angle)
+    while len(angle)<3:
+        angle = '0' + angle
+    test_dataset = None if noFrame else []
+    test_preprocessed = []
+    for folder in sorted(os.listdir(os.getcwd()+'GaitDatasetB-silh/'+subject)):
+        frames = None if noFrame else []
+        pro_frames = []
+        for file in sorted(
+                os.listdir(
+                    '/'.join(
+                        [os.getcwd()[:-1],
+                        'GaitDatasetB-silh/',
+                        subject,
+                        folder,
+                        angle]
+                    )
+                ):
+            if not noFrame:
+                frames.append(
+                cv2.imread(
+                    '/'.join(
+                        [os.getcwd()[:-1],
+                        'GaitDatasetB-silh/',
+                        subject,
+                        folder,
+                        angle,
+                        file])
+                    )
+                )
+            pro_frames.append(
+                preprocess(
+                    cv2.imread(
+                        '/'.join(
+                            [os.getcwd()[:-1],
+                            'GaitDatasetB-silh/',
+                            subject,
+                            folder,
+                            angle,
+                            file]
+                            )
+                        )
+                    )
+                )
+        if not noFrame:test_dataset.append(np.array(frames))
+        test_preprocessed.append(np.moveaxis(np.array(pro_frames),0,-1))
+    return test_dataset, test_preprocessed
