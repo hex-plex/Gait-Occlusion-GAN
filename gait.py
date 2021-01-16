@@ -147,13 +147,13 @@ def fetch_data(subject=0,angle=90,noFrame=False):
         angle = '0' + angle
     test_dataset = None if noFrame else []
     test_preprocessed = []
-    for folder in sorted(os.listdir(os.getcwd()+'GaitDatasetB-silh/'+subject)):
+    for folder in sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh/'+subject)):
         frames = None if noFrame else []
         pro_frames = []
         for file in sorted(
                 os.listdir(
                     '/'.join(
-                        [os.getcwd()[:-1],
+                        [os.getcwd(),
                         'GaitDatasetB-silh/',
                         subject,
                         folder,
@@ -164,7 +164,7 @@ def fetch_data(subject=0,angle=90,noFrame=False):
                 frames.append(
                 cv2.imread(
                     '/'.join(
-                        [os.getcwd()[:-1],
+                        [os.getcwd(),
                         'GaitDatasetB-silh/',
                         subject,
                         folder,
@@ -176,7 +176,7 @@ def fetch_data(subject=0,angle=90,noFrame=False):
                 preprocess(
                     cv2.imread(
                         '/'.join(
-                            [os.getcwd()[:-1],
+                            [os.getcwd(),
                             'GaitDatasetB-silh/',
                             subject,
                             folder,
@@ -189,3 +189,17 @@ def fetch_data(subject=0,angle=90,noFrame=False):
         if not noFrame:test_dataset.append(np.array(frames))
         test_preprocessed.append(np.moveaxis(np.array(pro_frames),0,-1))
     return test_dataset, test_preprocessed
+
+def supervision(kmeans, angle_subject=None):
+    """
+    kmeans is a list of kmeans for each angle as that could be the biggest variance
+    """
+    if angle_subject is None:
+        for folder in sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh')):
+            for subfolder in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh',folder]):
+                for angle in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh', folder,subfolder):
+                    for file in sorted(os.listdir( '/'.join([os.getcowd(),'GaitDatasetB-silh',folder, subfolder,angle])):
+                        pass
+
+    else:
+        pass
