@@ -195,11 +195,24 @@ def supervision(kmeans, angle_subject=None):
     kmeans is a list of kmeans for each angle as that could be the biggest variance
     """
     if angle_subject is None:
+        frames = []
+        frames_name = []
         for folder in sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh')):
             for subfolder in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh',folder]):
                 for angle in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh', folder,subfolder):
-                    for file in sorted(os.listdir( '/'.join([os.getcowd(),'GaitDatasetB-silh',folder, subfolder,angle])):
-                        pass
+                    kmean = kmeans[angle]
+                    for file in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh',folder, subfolder,angle])):
+                        frames_name.append(file)
+                        frames.append(cv2.imread( '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,file]))
+                    W_t, A1_t, A_t, _, avg_t = get_feature_vectors(frames)
+                    key_poses = graph_sort(kmean,W_t)
+                    info = {}
+                    for key_pose, frame_name in zip(key_poses, frames_name):
+                        info[frame_name] = key_pose
+                    with open('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'labels.pkl']),'wb') as handle:
+                        pickle.dump(info,handle,protocol=pickle.HIGHEST_PROTOCOL)
+                    frames_name = []
+                    frames = []
 
     else:
         pass
