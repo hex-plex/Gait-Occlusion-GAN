@@ -210,7 +210,7 @@ def supervision(kmeans, angle_subject=None, override=False):
                             if file[-3:]!="pkl":
                                 frames_name.append(file)
                                 frames.append(cv2.imread( '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,file])))
-                        if len(frames) >= 10:
+                        if len(frames) < 10:
                             outliers.append('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle]))
                         else:
                             try:
