@@ -210,16 +210,20 @@ def supervision(kmeans, angle_subject=None, override=False):
                             if file[-3:]!="pkl":
                                 frames_name.append(file)
                                 frames.append(cv2.imread( '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,file])))
-                        if frames == []:
-                            outliers.append('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,file]))
-                        else:    
-                            W_t, _, _, _, _ = get_feature_vectors(frames)
-                            key_poses = graph_sort(kmean,W_t)
-                            info = {}
-                            for key_pose, frame_name in zip(key_poses, frames_name):
-                                info[frame_name] = key_pose
-                            with open('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'labels.pkl']),'wb') as handle:
-                                pickle.dump(info,handle,protocol=pickle.HIGHEST_PROTOCOL)
+                        if len(frames) >= 10:
+                            outliers.append('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle]))
+                        else:
+                            try:
+                                W_t, _, _, _, _ = get_feature_vectors(frames)
+                                key_poses = graph_sort(kmean,W_t)
+                                info = {}
+                                for key_pose, frame_name in zip(key_poses, frames_name):
+                                    info[frame_name] = key_pose
+                                with open('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'labels.pkl']),'wb') as handle:
+                                    pickle.dump(info,handle,protocol=pickle.HIGHEST_PROTOCOL)
+                            except Exception as e:
+                                print('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle]))
+                                raise Exception(e)
                         frames_name = []
                         frames = []
         print(outliers)
