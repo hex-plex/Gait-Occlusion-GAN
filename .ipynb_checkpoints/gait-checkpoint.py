@@ -3,6 +3,7 @@ import numpy as np
 import time
 import os
 import pickle
+from tqdm import tqdm
 
 def preprocess(img):
     cnt, heir = cv2.findContours(img[:,:,0],cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
@@ -192,29 +193,36 @@ def fetch_data(subject=0,angle=90,noFrame=False):
         test_preprocessed.append(np.moveaxis(np.array(pro_frames),0,-1))
     return test_dataset, test_preprocessed
 
-def supervision(kmeans, angle_subject=None):
+def supervision(kmeans, angle_subject=None, override=False):
     """
     kmeans is a list of kmeans for each angle as that could be the biggest variance
     """
     if angle_subject is None:
         frames = []
         frames_name = []
-        for folder in sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh')):
+        outliers = []
+        for folder in tqdm(sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh'))):
             for subfolder in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh',folder]))):
                 for angle in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh', folder,subfolder]))):
-                    kmean = kmeans[angle]
-                    for file in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh',folder, subfolder,angle]))):
-                        frames_name.append(file)
-                        frames.append(cv2.imread( '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,file])))
-                    W_t, A1_t, A_t, _, avg_t = get_feature_vectors(frames)
-                    key_poses = graph_sort(kmean,W_t)
-                    info = {}
-                    for key_pose, frame_name in zip(key_poses, frames_name):
-                        info[frame_name] = key_pose
-                    with open('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'labels.pkl']),'wb') as handle:
-                        pickle.dump(info,handle,protocol=pickle.HIGHEST_PROTOCOL)
-                    frames_name = []
-                    frames = []
+                    if override or not os.path.isfile('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'labels.pkl'])):
+                        kmean = kmeans[angle]
+                        for file in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh',folder, subfolder,angle]))):
+                            if file[-3:]!="pkl":
+                                frames_name.append(file)
+                                frames.append(cv2.imread( '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,file])))
+                        if frames == []:
+                            outliers.append('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,file]))
+                        else:    
+                            W_t, _, _, _, _ = get_feature_vectors(frames)
+                            key_poses = graph_sort(kmean,W_t)
+                            info = {}
+                            for key_pose, frame_name in zip(key_poses, frames_name):
+                                info[frame_name] = key_pose
+                            with open('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'labels.pkl']),'wb') as handle:
+                                pickle.dump(info,handle,protocol=pickle.HIGHEST_PROTOCOL)
+                        frames_name = []
+                        frames = []
+        print(outliers)
         return True
     else:
         return False
@@ -226,13 +234,21 @@ def kmean_train(subject, choice, override = False):
             kmeans = {}
             for angle in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh',subject,choice]))):
                 km = KMeans()
-                imgs = (cv2.imread('/'.join([os.getcwd(),'GaitDatasetB-silh',subject, choice,angle,file])) for file in sorted(os.listdir('/'.join([os.getcwd(), 'GaitDatasetB-silh', subject,choice,angle]))))
+                imgs = []
+                for file in sorted(os.listdir('/'.join([os.getcwd(), 'GaitDatasetB-silh', subject,choice,angle]))):
+                    if file[-3:]!="pkl":
+                        imgs.append(cv2.imread('/'.join([os.getcwd(),'GaitDatasetB-silh',subject, choice,angle,file]))) 
                 W_t, _, _, _, _ = get_feature_vectors(imgs)
                 km.fit(W_t)
                 kmeans[angle] = [km.states, km.P]
             np.savez_compressed('Kmeans_weights',**kmeans)
             del kmeans
-        kmeans = np.load('Kmeans_weights.npz',allow_pickle=True)
+        kmeans_weights = np.load('Kmeans_weights.npz',allow_pickle=True)
+        kmeans = {}
+        for angle in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh',subject,choice]))):
+            km = KMeans()
+            km.states, km.P = kmeans_weights[angle]
+            kmeans[angle] = km
         return kmeans 
     else:
         raise Exception("Could not find the specified subject and choice")
