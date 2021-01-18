@@ -4,3 +4,5 @@ data/*
 prev/
 GaitDatasetB-silh.zip
 GaitDatasetB-silh/
+labels_cache.npz
+Kmeans_weights.npz

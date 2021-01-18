@@ -256,3 +256,28 @@ def kmean_train(subject, choice, override = False):
         return kmeans 
     else:
         raise Exception("Could not find the specified subject and choice")
+        
+def fetch_labels(label_angle=None,filename="labels_cache",save=True,override=False):
+    if override or not os.path.isfile(os.getcwd()+'/'+filename+'.npz'):
+        labels = {}
+        for folder in tqdm(sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh'))):
+            for subfolder in sorted(os.listdir('/'.join([os.getcwd(), 'GaitDatasetB-silh', folder]))):
+                if label_angle is None:
+                    angle_set = sorted(os.listdir('/'.join([os.getcwd(), 'GaitDatasetB-silh',folder,subfolder])))
+                else:
+                    angle_set = [label_angle]
+                for angle in angle_set:
+                    label_file = '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'labels.pkl'])
+                    if os.path.isfile(label_file):
+                        labels_temp = pickle.load(open(label_file, 'rb'))
+                        for file in sorted(os.listdir('/'.join([os.getcwd(),'GaitDatasetB-silh', folder, subfolder, angle]))):
+                            if file[-3:]!="pkl":
+                                labels['/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,file])] = labels_temp[file]
+        if save:
+            if label_angle is not None:
+                filename += '-'+label_angle
+            np.savez_compressed(filename,**labels)
+    else:
+        labels = np.load(filename+".npz",allow_pickle=True)
+    
+    return labels
