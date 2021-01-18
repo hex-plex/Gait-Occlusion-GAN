@@ -102,7 +102,8 @@ def encoder_model():
     ## Ignore the missing from loss dictionary error
     return encoder, full_model
 CVAE, CVAE_FULL = encoder_model()
-
+tb = keras.callbacks.TensorBoard(logdir="logs")
+mc = keras.callbacks.ModelCheckpoint(file="weights/CVAE_FULL.h5")
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, files, labels, preprocess=None, batch_size = 50, dim=(160,160), n_channels=1, n_classes=16, shuffle=True):
         self.dim = dim
@@ -152,7 +153,7 @@ for i in sorted(test_partition)[::-1]:
 train_data = DataGenerator(files,labels,preprocess=gait.preprocess)
 valid_data = DataGenerator(test_files, labels, preprocess=gait.preprocess)
 if os.path.isfile(os.getcwd()+"weights/CVAE_FULL.h5"):
-	CVAE_FULL = keras.models.load_model("weights/CVAE_FULL.h5")
+	CVAE_FULL.load_weights("weights/CVAE_FULL.h5")
 	print("Successfully loaded the model")
 
 history = CVAE_FULL.fit_generator(generator=train_data,
@@ -160,6 +161,7 @@ history = CVAE_FULL.fit_generator(generator=train_data,
                                   steps_per_epoch = len(files)//batch_size,
                                   epochs=1,
                                   validation_steps = len(test_files)//batch_size,
+				  callbacks=[tb,mc],
                                   use_multiprocessing=True,
                                   workers=4)
-CVAE_FULL.save("weights/CVAE_FULL.h5")
+CVAE_FULL.save_weights("weights/CVAE_FULL.h5")
