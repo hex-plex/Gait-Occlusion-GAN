@@ -65,25 +65,22 @@ def encoder_model():
     z1 = keras.layers.Dense(1024, activation='relu', name="z_dense_3")(z1)
     zim = keras.layers.Reshape((4,4,64),name="reshape_image")(z1)
     zim = keras.layers.Conv2DTranspose(filters=32,
-                                       kernel_size=(5,5),
+                                       kernel_size=(7,7),
                                        strides=(3,3),
                                        activation='relu',
                                        name="z_convT_1")(zim)
-    zim = keras.layers.convolutional.ZeroPadding2D(padding=(1, 1))(zim)
     zim = keras.layers.Dropout(0.1, name="z_dropout_1")(zim, training=True)
     zim = keras.layers.Conv2DTranspose(filters=16,
-                                       kernel_size=(5,5),
+                                       kernel_size=(7,7),
                                        strides=(3,3),
                                        activation='relu',
                                        name="z_convT_2")(zim)
-    zim = keras.layers.convolutional.ZeroPadding2D(padding=(1, 1))(zim)
     zim = keras.layers.Dropout(0.1, name="z_dropout_2")(zim, training=True)
-    zim = keras.layers.Conv2DTranspose(filters=3,
-                                       kernel_size=(5,5),
+    zim = keras.layers.Conv2DTranspose(filters=8,
+                                       kernel_size=(7,7),
                                        strides=(3,3),
                                        activation='relu',
                                        name="z_convT_3")(zim)
-    zim = keras.layers.convolutional.ZeroPadding2D(padding=(1, 1))(zim)
     zim = keras.layers.Dropout(0.1, name="z_dropout_3")(zim, training=True)
     y = keras.layers.Conv2D(filters=1,
                             kernel_size=(1,1),
@@ -101,8 +98,10 @@ def encoder_model():
     full_model.compile(optimizer='adam', loss=None)
     ## Ignore the missing from loss dictionary error
     return encoder, full_model
-CVAE, CVAE_FULL = encoder_model()
 
+CVAE, CVAE_FULL = encoder_model()
+tb = keras.callbacks.TensorBoard(log_dir="logs")
+mc = keras.callbacks.ModelCheckpoint(filepath="weights/CVAE_FULL.h5")
 class DataGenerator(keras.utils.Sequence):
     def __init__(self, files, labels, preprocess=None, batch_size = 50, dim=(160,160), n_channels=1, n_classes=16, shuffle=True):
         self.dim = dim
@@ -151,12 +150,16 @@ for i in sorted(test_partition)[::-1]:
     
 train_data = DataGenerator(files,labels,preprocess=gait.preprocess)
 valid_data = DataGenerator(test_files, labels, preprocess=gait.preprocess)
+if os.path.isfile(os.getcwd()+"weights/CVAE_FULL.h5"):
+	CVAE_FULL.load_weights("weights/CVAE_FULL.h5")
+	print("Successfully loaded the model")
 
 history = CVAE_FULL.fit_generator(generator=train_data,
                                   validation_data = valid_data,
                                   steps_per_epoch = len(files)//batch_size,
                                   epochs=1000,
                                   validation_steps = len(test_files)//batch_size,
+				  callbacks=[tb,mc],
                                   use_multiprocessing=True,
-                                  workers=6)
-CVAE_FULL.save("weights/CVAE_FULL.h5")
+                                  workers=4)
+CVAE_FULL.save_weights("weights/CVAE_FULL.h5")
