@@ -99,6 +99,7 @@ def encoder_model():
     ## Ignore the missing from loss dictionary error
     return encoder, full_model
 
+
 CVAE, CVAE_FULL = encoder_model()
 tb = keras.callbacks.TensorBoard(log_dir="logs")
 mc = keras.callbacks.ModelCheckpoint(filepath="weights/CVAE_FULL.h5")
@@ -137,24 +138,25 @@ class DataGenerator(keras.utils.Sequence):
             X[i,] = cv2.copyMakeBorder(self.preprocess(cv2.imread(file)), 0, 0, 20, 20, cv2.BORDER_CONSTANT, (0,0,0)).reshape(*self.dim, self.n_channels)/255.
             z[i] = self.labels[file]
         return X, keras.utils.to_categorical(z, num_classes=self.n_classes)
-    
-labels = gait.fetch_labels(label_angle=angle,save=False,override=True)
-files = [filename for filename in labels]
 
-test_files = []
-test_partition = np.random.randint(0,len(files),size=3000)
-for i in test_partition:
-    test_files.append(files[i])
-for i in sorted(test_partition)[::-1]:
-    del files[i]
-    
-train_data = DataGenerator(files,labels,preprocess=gait.preprocess)
-valid_data = DataGenerator(test_files, labels, preprocess=gait.preprocess)
-if os.path.isfile(os.getcwd()+"weights/CVAE_FULL.h5"):
-	CVAE_FULL.load_weights("weights/CVAE_FULL.h5")
-	print("Successfully loaded the model")
+def main():
+    labels = gait.fetch_labels(label_angle=angle,save=False,override=True)
+    files = [filename for filename in labels]
 
-history = CVAE_FULL.fit_generator(generator=train_data,
+    test_files = []
+    test_partition = np.random.randint(0,len(files),size=3000)
+    for i in test_partition:
+        test_files.append(files[i])
+    for i in sorted(test_partition)[::-1]:
+        del files[i]
+    
+    train_data = DataGenerator(files,labels,preprocess=gait.preprocess)
+    valid_data = DataGenerator(test_files, labels, preprocess=gait.preprocess)
+    if os.path.isfile(os.getcwd()+"weights/CVAE_FULL.h5"):
+        CVAE_FULL.load_weights("weights/CVAE_FULL.h5")
+        print("Successfully loaded the model")
+
+    history = CVAE_FULL.fit_generator(generator=train_data,
                                   validation_data = valid_data,
                                   steps_per_epoch = len(files)//batch_size,
                                   epochs=1000,
@@ -162,4 +164,7 @@ history = CVAE_FULL.fit_generator(generator=train_data,
 				  callbacks=[tb,mc],
                                   use_multiprocessing=True,
                                   workers=4)
-CVAE_FULL.save_weights("weights/CVAE_FULL.h5")
+    CVAE_FULL.save_weights("weights/CVAE_FULL.h5")
+
+if __name__ == "__main__":
+    main()
