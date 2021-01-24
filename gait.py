@@ -52,7 +52,7 @@ class KMeans():
             temp_states = []
             for i in range(self.K):
                 temp_state = []
-                for j in [max(0,i-1), min(i+1,self.K-1)]:
+                for j in [(i-1)%self.K, (i+1)%self.K]:
                     if i == j: continue
                     for state in self.states[j]:
                         if np.linalg.norm(self.W[:,state]-self.P[:,i]) <= np.linalg.norm(self.W[:,state]-self.P[:,j]):
@@ -281,3 +281,18 @@ def fetch_labels(label_angle=None,filename="labels_cache",save=True,override=Fal
         labels = np.load(filename+".npz",allow_pickle=True)
     
     return labels
+
+def encode_data(encoder,label_angle=None):
+    for folder in tqdm(sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh'))):
+            for subfolder in sorted(os.listdir('/'.join([os.getcwd(), 'GaitDatasetB-silh', folder]))):
+                if label_angle is None:
+                    angle_set = sorted(os.listdir('/'.join([os.getcwd(), 'GaitDatasetB-silh',folder,subfolder])))
+                else:
+                    angle_set = [label_angle]
+                for angle in angle_set:
+                    label_file = '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'labels.pkl'])
+                    if os.path.isfile(label_file):
+                        labels_temp = pickle.load(open(label_file, 'rb'))
+                        for file in sorted(os.listdir('/'.join([os.getcwd(),'GaitDatasetB-silh', folder, subfolder, angle]))):
+                            if file[-3:]!="pkl":
+    
