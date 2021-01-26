@@ -283,6 +283,7 @@ def fetch_labels(label_angle=None,filename="labels_cache",save=True,override=Fal
     return labels
 
 def encode_data(encoder,label_angle=None):
+    info = {}
     for folder in tqdm(sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh'))):
             for subfolder in sorted(os.listdir('/'.join([os.getcwd(), 'GaitDatasetB-silh', folder]))):
                 if label_angle is None:
@@ -292,7 +293,20 @@ def encode_data(encoder,label_angle=None):
                 for angle in angle_set:
                     label_file = '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'labels.pkl'])
                     if os.path.isfile(label_file):
-                        labels_temp = pickle.load(open(label_file, 'rb'))
+                        labels = pickle.load(open(label_file, 'rb'))
+                        labels_temp = list(enumerate(labels))
+                        enc_vec = []
+                        images = []
                         for file in sorted(os.listdir('/'.join([os.getcwd(),'GaitDatasetB-silh', folder, subfolder, angle]))):
                             if file[-3:]!="pkl":
-    
+                                images.append(cv2.copyMakeBorder(preprocess(cv2.imread(file)), 0, 0, 20, 20, cv2.BORDER_CONSTANT, (0,0,0)).reshape(1,160,160,1)/255.)
+                        for j in range(int(np.ceil(len(labels_temp)/50.0))):
+                            imgs = np.zeros((50,160,160,1))
+                            z = np.zeros((50),dtype=int)
+                            for i, (global_i, file) in enumerate(labels_temp[50*j:min(50*(j+1), len(labels_temp)-1)]):
+                                imgs[i,] = images[global_i,]
+                                z[i] = labels[file]
+                                enc_vec.append(encoder.predict([imgs,z_vec], batch_size=50))
+                            enc_vec = np.array(enc_vec).reshape(-1,16)[:len(labels_temp),:]
+                        info['/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle])] = enc_vec
+    return info
