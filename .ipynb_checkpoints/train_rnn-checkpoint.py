@@ -9,24 +9,48 @@ import gait
 from tqdm import tqdm
 import cv2
 
-if False and os.path.isfile(os.getcwd()+'/weights/CVAE_FULL.h5'):
-    CVAE_FULL.load_weights('weights/CVAE_FULL.h5')
-    print("Loaded weights successfully")
-elif False:
-    raise Exception("No Weights found !!")
+image_vec_shape = 12
+gait_key_poses = 16
+conditional_vec_shape = 4
+pose_image_shape = (160,160,1)
+batch_size = 50
+full_vec_shape = image_vec_shape+conditional_vec_shape
+n_timesteps = 3
 
-encoder = keras.models.Model(CVAE_FULL.input, CVAE_FULL.get_layer("concat_zcond").output)
+model_OneRNN = keras.models.Sequential()
+model_OneRNN.add(keras.layers.LSTM(256,
+                                   activation='tanh',
+                                   return_sequences=True,
+                                   input_shape=(n_timesteps,image_vec_shape+conditional_vec_shape)
+                                  ))
+model_OneRNN.add(keras.layers.LSTM(128,
+                                   activation='tanh',
+                                   return_sequences=True
+                                  ))
+model_OneRNN.add(keras.layers.LSTM(64,
+                                   activation='tanh'
+                                  ))
+model_OneRNN.add(keras.layers.Dense(image_vec_shape+conditional_vec_shape,
+                                    activation='linear'
+                                  ))
+model_OneRNN.compile(optimizer='adam', loss='mse')
 
-labels = gait.fetch_labels(label_angle="090",save=False,override=True)
+def main():
+    if os.path.isfile(os.getcwd()+'/weights/CVAE_FULL.h5'):
+        CVAE_FULL.load_weights('weights/CVAE_FULL.h5')
+        print("Loaded weights successfully")
+    else:
+        raise Exception("No Weights found !!")
 
-files = [filename for filename in labels]
+    encoder = keras.models.Model(CVAE_FULL.input, CVAE_FULL.get_layer("concat_zcond").output)
 
-imgs = np.empty((50,160,160,1))
-z = np.empty((50),dtype=int)
-for i,file in enumerate(files[0:50]):
-    imgs[i,] = cv2.copyMakeBorder(gait.preprocess(cv2.imread(file)), 0, 0, 20, 20, cv2.BORDER_CONSTANT, (0,0,0)).reshape(160,160,1)/255.
-    z[i] = labels[file]
-z_vec = keras.utils.to_categorical(z, num_classes=16)
+    encoded_vec = gait.encode_data(encoder,label_angle='090')
 
-enc_vec = encoder.predict([imgs,z_vec],batch_size=50)
-print(enc_vec)
+    x, y = gait.encoded2timeseries(encoded_vec,3)
+    if os.path.isfile(os.getcwd()+'/weights/OneRNN.h5'):
+        model_OneRNN.load_weights('weights/OneRNN.h5')
+    history = model_OneRNN.fit(x, y, epochs=250, validation_split=0.1, batch_size=64)
+    return history
+
+if __name__ == "__main__":
+    main()
