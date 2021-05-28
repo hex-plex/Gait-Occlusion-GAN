@@ -13,8 +13,8 @@ def make_dataset():
     for subfolder in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh','001']))):
         subject = []
         for file in sorted(os.listdir( '/'.join([os.getcwd(),'GaitDatasetB-silh', '001',subfolder,'090']))):
-            subject.append(preprocess(cv2.imread('/'.join([os.getcwd(),'GaitDatasetB-silh/','001',subfolder,'090',file]))))
+            subject.append((cv2.imread('/'.join([os.getcwd(),'GaitDatasetB-silh/','001',subfolder,'090',file]),0)))
         
         subjects.append(np.array(subject))
-
+    
     return subjects

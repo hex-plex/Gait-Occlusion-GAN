@@ -7,15 +7,15 @@ from tqdm import tqdm
 import keras
 
 def preprocess(img):
-    cnt, heir = cv2.findContours(img[:,:,0],cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    cnt, heir = cv2.findContours(img[:,:],cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     if (len(cnt)>0):
         x,y,w,h = cv2.boundingRect(cnt[0])
-        temp = img[y:y+h, x:x+w, 0]
+        temp = img[y:y+h, x:x+w]
         w1 = (h*3)//4
         temp = cv2.copyMakeBorder(temp, 0,0, max(w1-w,0)//2, max(w1-w,0)//2, cv2.BORDER_CONSTANT, (0,0,0))
-        return cv2.resize(temp, (120,160))
+        return cv2.resize(temp, (160,120))
     else:
-        return np.zeros((160,120))
+        return np.zeros((120,160))
 
 def get_feature_vectors(imgs,k=10):
     G = np.vstack(tuple(preprocess(img).reshape(-1).astype(np.float64)/255. for img in imgs))
