@@ -2,11 +2,11 @@
 from pathlib import Path
 import pickle
 
-def getims(cluster=4,path='/home/ishikaa/Downloads'):
+def getims(cluster=4,dir='/home/ishikaa/Downloads'):
     clusters = []
     paths = []
 
-    for path in Path(path).rglob('labels.pkl'):
+    for path in Path(dir).rglob('labels.pkl'):
         file_to_read = open(path, "rb")
         temp_dict = pickle.load(file_to_read)
         temp_cluster = [k for k,v in temp_dict.items() if v==cluster]
