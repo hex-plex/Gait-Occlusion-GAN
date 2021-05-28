@@ -7,10 +7,10 @@ from tqdm import tqdm
 import keras
 
 def preprocess(img):
-    cnt, heir = cv2.findContours(img[:,:],cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    cnt, heir = cv2.findContours(img[:,:,0],cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
     if (len(cnt)>0):
         x,y,w,h = cv2.boundingRect(cnt[0])
-        temp = img[y:y+h, x:x+w]
+        temp = img[y:y+h, x:x+w,0]
         w1 = (h*3)//4
         temp = cv2.copyMakeBorder(temp, 0,0, max(w1-w,0)//2, max(w1-w,0)//2, cv2.BORDER_CONSTANT, (0,0,0))
         return cv2.resize(temp, (160,120))
