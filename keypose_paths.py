@@ -2,10 +2,10 @@
 from pathlib import Path
 import pickle
 
-def getims(cluster=4,dir='/home/ishikaa/Downloads'):
+def get_keyposepath(cluster=4,dir='/home/ishikaa/Downloads'):
+
     clusters = []
     paths = []
-
     for path in Path(dir).rglob('labels.pkl'):
         file_to_read = open(path, "rb")
         temp_dict = pickle.load(file_to_read)
