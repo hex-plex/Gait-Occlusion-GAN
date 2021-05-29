@@ -140,6 +140,7 @@ def fetch_p_vec(key_poses,K,A_i,avg_i):
         indicies = np.where(key_poses==i)[0]
         PEI.append((A_i[:,indicies]+avg_i.reshape(-1,1)).reshape(160,120,-1).mean(axis=-1))
         PK.append(len(indicies)/len(key_poses))
+        
     return np.asarray(PEI), np.asarray(PK)
 
 def fetch_data(subject=0,angle=90,noFrame=False):

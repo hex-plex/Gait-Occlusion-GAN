@@ -1,6 +1,7 @@
 import re
 import os
 import cv2
+import numpy as np
 from keypose_paths import get_keyposepath
 
 def angle_ims(exp=1,angle=0,keypose = 4,data_path='/home/ishikaa/Downloads'):
@@ -16,8 +17,8 @@ def angle_ims(exp=1,angle=0,keypose = 4,data_path='/home/ishikaa/Downloads'):
     os.chdir(data_path)
     exp = f"{exp:03}"
     angle = f"{angle:03}"
-    # paths_k = get_keyposepath(cluster = keypose, dir=data_path)
-    # paths_k.sort()
+    paths_k = get_keyposepath(cluster = keypose, dir=data_path)
+    paths_k.sort()
 
     # if not(type(paths_k)==list):
     #     print('Error, \'paths_k\' type: not got a list')
@@ -31,11 +32,11 @@ def angle_ims(exp=1,angle=0,keypose = 4,data_path='/home/ishikaa/Downloads'):
     images = []
     for sub in subject:
 
-        re_mask = re.compile('.*/'+exp+'/'+sub+'/'+ang+'($|/.*)')
+        re_mask = re.compile('.*/'+exp+'/'+sub+'/'+angle+'($|/.*)')
         results = [re_mask.search(str(path)).group(0) for path in paths_k if re_mask.search(str(path))]
         
         if len(results)>2:
             # ims = np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))])
-            ds.append(np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))]))
+            images.append(np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))]))
 
     return images
