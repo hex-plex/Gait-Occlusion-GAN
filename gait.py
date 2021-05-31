@@ -13,7 +13,7 @@ def preprocess(img):
         temp = img[y:y+h, x:x+w,0]
         w1 = (h*3)//4
         temp = cv2.copyMakeBorder(temp, 0,0, max(w1-w,0)//2, max(w1-w,0)//2, cv2.BORDER_CONSTANT, (0,0,0))
-        return cv2.resize(temp, (160,120))
+        return cv2.resize(temp, (120,160))
     else:
         return np.zeros((120,160))
 
