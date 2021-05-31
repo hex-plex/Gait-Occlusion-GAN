@@ -45,7 +45,7 @@ def angle_ims(exp=1,angle=0,keypose = 4,data_path='/home/ishikaa/Downloads'):
     # results = [re_mask.search(str(path)).group(0) for path in paths_k if re_mask.search(str(path))]
     # images = [cv2.imread(file) for file in results]
 
-    subject = sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh/'+'001'))
+    subject = sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh/'+exp))
     images = []
     for sub in subject:
 
