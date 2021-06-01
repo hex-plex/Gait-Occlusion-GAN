@@ -4,8 +4,12 @@ import cv2
 import numpy as np
 from pathlib import Path
 import pickle
+from torch.cuda import is_available
 
 def get_keyposepath(cluster=4,dir='/home/ishikaa/Downloads'):
+    '''
+    Returns paths to all images belonging to certain keypose
+    '''
 
     clusters = []
     paths = []
@@ -57,3 +61,10 @@ def angle_ims(exp=1,angle=0,keypose = 4,data_path='/home/ishikaa/Downloads'):
             images.append(np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))]))
 
     return images
+
+def get_device():
+    if is_available():
+        device = 'cuda:0'
+    else:
+        device = 'cpu'
+    return device
