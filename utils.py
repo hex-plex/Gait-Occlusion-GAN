@@ -42,16 +42,9 @@ def angle_ims(exp=1,angle=0,keypose = 4,data_path='/home/ishikaa/Downloads'):
     paths_k = get_keyposepath(cluster = keypose, dir=data_path)
     paths_k.sort()
 
-    # if not(type(paths_k)==list):
-    #     print('Error, \'paths_k\' type: not got a list')
-    #     return
-
-    # re_mask = re.compile('.*/'+angle+'($|/.*)')
-    # results = [re_mask.search(str(path)).group(0) for path in paths_k if re_mask.search(str(path))]
-    # images = [cv2.imread(file) for file in results]
-
     subject = sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh/'+exp))
     images = []
+    paths = []
     for sub in subject:
 
         re_mask = re.compile('.*/'+exp+'/'+sub+'/'+angle+'($|/.*)')
@@ -60,6 +53,7 @@ def angle_ims(exp=1,angle=0,keypose = 4,data_path='/home/ishikaa/Downloads'):
         if len(results)>2:
             # ims = np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))])
             images.append(np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))]))
+            # paths.append([file for file,_ in zip(results,range(3))])
 
     return images
 
