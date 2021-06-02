@@ -5,6 +5,7 @@ import numpy as np
 from pathlib import Path
 import pickle
 from torch.cuda import is_available
+import matplotlib.pyplot as plt
 
 def get_keyposepath(cluster=4,dir='/home/ishikaa/Downloads'):
     '''
@@ -68,3 +69,7 @@ def get_device():
     else:
         device = 'cpu'
     return device
+
+def imshow(img):
+    img = img / 2 + 0.5  
+    plt.imshow(np.transpose(img, (1, 2, 0))) 
