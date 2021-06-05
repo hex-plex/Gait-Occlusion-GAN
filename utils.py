@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 from pathlib import Path
 import pickle
-from torch.cuda import is_available
 import matplotlib.pyplot as plt
 from gait import preprocess,fetch_labels
 
@@ -53,35 +52,35 @@ def angle_ims(exp=1,angle=0,keypose = 4,data_path='/home/ishikaa/Downloads'):
         
         if len(results)>2:
             # ims = np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))])
-            images.append(np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))]))
-            # paths.append([file for file,_ in zip(results,range(3))])
+            # images.append(np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))]))
+            paths.append([file for file,_ in zip(results,range(3))])
 
-    return images
-
-def get_device():
-    if is_available():
-        device = 'cuda:0'
-    else:
-        device = 'cpu'
-    return device
-
-def imshow(img):
-    img = img / 2 + 0.5  
-    plt.imshow(np.transpose(img, (1, 2, 0))) 
+    return paths
 
 
-def simple_mean(angle=0,cluster=4,path='/home/ishikaa/Downloads/'):
-    '''
-    Gets mean frame by simple averaging all frames belonging to certain angle and keypose.
+
+def imshow(model_out,actual):
+    # img = img / 2 + 0.5  
+    fig, axes = plt.subplots(nrows=1, ncols=2, sharex=True, sharey=True, figsize=(12,4))
+    axes[0].imshow(model_out,cmap='gray',vmin=0,vmax=1)
+    axes[0].set_title('Model')
+    axes[1].imshow(actual,cmap='gray',vmin=0,vmax=1)
+    axes[1].set_title('Average')
+    plt.show()
+
+
+# def simple_mean(angle=0,cluster=4,path='/home/ishikaa/Downloads/'):
+#     '''
+#     Gets mean frame by simple averaging all frames belonging to certain angle and keypose.
         
-    Args:
-    angle: Angle
-    cluster: Keypose
-    path: path where dataset is stored
-    '''
-    os.chdir(path)
-    labels = fetch_labels(label_angle=f"{angle:03}",save=False,override=True)
-    files = [filename for filename, value in labels.items() if value==cluster]
-    images_0_4 = [preprocess(cv2.imread(file))/255 for file in files]
+#     Args:
+#     angle: Angle
+#     cluster: Keypose
+#     path: path where dataset is stored
+#     '''
+#     os.chdir(path)
+#     labels = fetch_labels(label_angle=f"{angle:03}",save=False,override=True)
+#     files = [filename for filename, value in labels.items() if value==cluster]
+#     images_0_4 = [preprocess(cv2.imread(file))/255 for file in files]
     
-    return np.mean([image for image in images_0_4],axis=0)
+#     return np.mean([image for image in images_0_4],axis=0)

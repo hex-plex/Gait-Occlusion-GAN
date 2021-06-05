@@ -1,7 +1,9 @@
 import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
 from gait import preprocess
 from utils import angle_ims
 import numpy as np
+import cv2
 
 class Conv3D(nn.Module):
 
@@ -42,9 +44,9 @@ class Conv3D(nn.Module):
         
         return out
 
-class PEIData(Dataset):
+class PEI(Dataset):
 
-    def __init__(self, num_exps,transform=None):
+    def __init__(self, num_exps, angle=0, keypose=4):
         """
         Custom dataset for images of a certain keypose at a given angle.
 
@@ -54,25 +56,23 @@ class PEIData(Dataset):
             data_path (str) : Path where dataset is downloaded
         """
         
-        ds = []
+        self.ds = [] #Paths to all images d[0]=> subject 1  (len = num of frames for it)
         for i in range(num_exps):
-            exp = angle_ims(exp=i+1,angle=0,keypose = 4)
-            ds = ds + exp
+            exp = angle_ims(exp=i+1,angle=angle,keypose = keypose)
+            self.ds = self.ds + exp
 
-        images = np.empty((len(ds),3,ds[0].shape[2]//2,ds[0].shape[1]//2))
-
-        for i in range(len(ds)):
-            images[i] = np.asarray([preprocess(im)/255 for im in ds[i]])
         
-        self.images = images.reshape(images.shape[0],1,images.shape[1],images.shape[2],images.shape[3]).astype('float32')
-
-        #Avg PEI after PCA .
-        # self.y = np.mean([image for image in images_0_4],axis=0)
 
     def __len__(self):
-        return len(self.images)
+
+        return len(self.ds)
 
     def __getitem__(self, idx):
-        return self.images[idx]
+
+        frames = np.asarray([preprocess(cv2.imread(im))/255. for im in self.ds[idx]])
+        y = np.mean([image for image in frames],axis=0)
+        
+        
+        return frames.reshape(1,frames.shape[0],frames.shape[1],frames.shape[2]).astype('float32'),y.astype('float32')
 
 

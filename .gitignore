@@ -6,4 +6,5 @@ GaitDatasetB-silh.zip
 GaitDatasetB-silh/
 labels_cache.npz
 Kmeans_weights.npz
-__pycachc__/
+ae_dict
+__pycache__
