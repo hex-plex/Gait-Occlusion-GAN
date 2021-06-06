@@ -321,10 +321,11 @@ def encode_data(encoder,label_angle=None,save=True,override=False):
                         info['/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle])] = np.load(enc_file)
     return info
 
-def encoded2timeseries(encoded_data, timestep=3):
+def encoded2timeseries(encoded_data, timestep=3, y_out = True):
     x, y = [], []
     for key, arr in encoded_data.items():
         for i in range(arr.shape[0] - timestep):
             x.append(arr[i:i+timestep,:])
-            y.append(arr[i+timestep,:])
+            if y_out:
+                y.append(arr[i+timestep,:])
     return np.array(x), np.array(y)
