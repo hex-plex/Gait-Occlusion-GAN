@@ -25,13 +25,15 @@ class Conv3D(nn.Module):
         '''
 
         l1 = nn.Conv3d(in_channels=in_channels,out_channels=out_channels,kernel_size=(ksized,ksize,ksize))
-        l2 = nn.ReLU()
+        l2 = nn.BatchNorm3d(out_channels)
+        l3 = nn.MaxPool3d((1, 1, 1))
+        l4 = nn.ReLU()
+
         
         if last:
-            return nn.Sequential(l1,l2)
+            return nn.Sequential(l1,l2,l4)
         else:
-            l3 = nn.MaxPool3d((1, 1, 1))
-            l4 = nn.BatchNorm3d(out_channels)
+            
             return nn.Sequential(l1,l2,l3,l4)
         
         
@@ -59,7 +61,7 @@ class PEI(Dataset):
 
         self.ds = [] #Paths to all images d[0]=> subject 1  (len = num of frames for it)
         for i in range(num_exps):
-            for j in range(len(paths_k)):
+            for j in range(len(keyposes)):
                 exp = ims(exp=i+1,angle=angle,paths_k=paths_k[j])
                 self.ds = self.ds + exp
 
@@ -71,8 +73,10 @@ class PEI(Dataset):
 
     def __getitem__(self, idx):
 
-        frames = np.asarray([preprocess(cv2.imread(im))/255. for im in self.ds[idx]])
-        y = np.mean([image for image in frames],axis=0)
+        frames = np.asarray([preprocess(cv2.imread(im))/255. for im in self.ds[idx]]) #Shape: (3,160,120)
+        y = np.mean([image for image in frames],axis=0) #Shape (160,120)
+        mask = np.random.random(frames.shape[0])<0.5
+        frames[mask] = np.zeros((frames.shape[1],frames.shape[2]))
         # X = self.occlude()
         
         
