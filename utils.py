@@ -68,19 +68,32 @@ def imshow(model_out,actual):
     axes[1].set_title('Average')
     plt.show()
 
+def ims(exp=1,angle=0,paths_k=[],data_path='/home/ishikaa/Downloads'):
+    '''
+    Returns images of certain angle for a keypose. (IN A GIVEN EXPERIMENT)
 
-# def simple_mean(angle=0,cluster=4,path='/home/ishikaa/Downloads/'):
-#     '''
-#     Gets mean frame by simple averaging all frames belonging to certain angle and keypose.
+    Args:
+    exp: Experiment
+    angle: Angle
+    keypose_paths: list of paths of images that belong to specifc keypose
+    '''
+
+    os.chdir(data_path)
+    exp = f"{exp:03}"
+    angle = f"{angle:03}"
+
+
+    subject = sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh/'+exp))
+    # images = []
+    paths = []
+    for sub in subject:
+
+        re_mask = re.compile('.*/'+exp+'/'+sub+'/'+angle+'($|/.*)')
+        results = [re_mask.search(str(path)).group(0) for path in paths_k if re_mask.search(str(path))]
         
-#     Args:
-#     angle: Angle
-#     cluster: Keypose
-#     path: path where dataset is stored
-#     '''
-#     os.chdir(path)
-#     labels = fetch_labels(label_angle=f"{angle:03}",save=False,override=True)
-#     files = [filename for filename, value in labels.items() if value==cluster]
-#     images_0_4 = [preprocess(cv2.imread(file))/255 for file in files]
-    
-#     return np.mean([image for image in images_0_4],axis=0)
+        if len(results)>2:
+            # ims = np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))])
+            # images.append(np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))]))
+            paths.append([file for file,_ in zip(results,range(3))])
+
+    return paths

@@ -6,5 +6,5 @@ GaitDatasetB-silh.zip
 GaitDatasetB-silh/
 labels_cache.npz
 Kmeans_weights.npz
-ae_dict
+time.ipynb
 __pycache__

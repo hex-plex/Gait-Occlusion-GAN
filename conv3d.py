@@ -1,7 +1,7 @@
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from gait import preprocess
-from utils import angle_ims
+from utils import ims,get_keyposepath
 import numpy as np
 import cv2
 
@@ -46,20 +46,22 @@ class Conv3D(nn.Module):
 
 class PEI(Dataset):
 
-    def __init__(self, num_exps, angle=0, keypose=4):
+    def __init__(self, num_exps=1,keyposes=[4], angle=0):
         """
         Custom dataset for images of a certain keypose at a given angle.
 
         Args:
             angle (int)     : Angle
-            keypose (int)   : Key-pose/Cluster
+            keypose (list)  : Key-poses/Clusters
             data_path (str) : Path where dataset is downloaded
         """
-        
+        paths_k = [sorted(get_keyposepath(cluster = i)) for i in keyposes]
+
         self.ds = [] #Paths to all images d[0]=> subject 1  (len = num of frames for it)
         for i in range(num_exps):
-            exp = angle_ims(exp=i+1,angle=angle,keypose = keypose)
-            self.ds = self.ds + exp
+            for j in range(len(paths_k)):
+                exp = ims(exp=i+1,angle=angle,paths_k=paths_k[j])
+                self.ds = self.ds + exp
 
         
 
@@ -71,6 +73,7 @@ class PEI(Dataset):
 
         frames = np.asarray([preprocess(cv2.imread(im))/255. for im in self.ds[idx]])
         y = np.mean([image for image in frames],axis=0)
+        # X = self.occlude()
         
         
         return frames.reshape(1,frames.shape[0],frames.shape[1],frames.shape[2]).astype('float32'),y.astype('float32')
