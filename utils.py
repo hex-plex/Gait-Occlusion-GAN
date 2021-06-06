@@ -53,7 +53,7 @@ def angle_ims(exp=1,angle=0,keypose = 4,data_path='/home/ishikaa/Downloads'):
         if len(results)>2:
             # ims = np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))])
             # images.append(np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))]))
-            paths.append([file for file,_ in zip(results,range(3))])
+            paths.append([file for file,_ in results])
 
     return paths
 
@@ -95,5 +95,36 @@ def ims(exp=1,angle=0,paths_k=[],data_path='/home/ishikaa/Downloads'):
             # ims = np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))])
             # images.append(np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))]))
             paths.append([file for file,_ in zip(results,range(3))])
+
+    return paths
+
+def check(exp=1,angle=0,paths_k=[],data_path='/home/ishikaa/Downloads'):
+    '''
+    FAKE
+    Returns images of certain angle for a keypose. (IN A GIVEN EXPERIMENT)
+
+    Args:
+    exp: Experiment
+    angle: Angle
+    keypose_paths: list of paths of images that belong to specifc keypose
+    '''
+
+    os.chdir(data_path)
+    exp = f"{exp:03}"
+    angle = f"{angle:03}"
+
+
+    subject = sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh/'+exp))
+    # images = []
+    paths = []
+    for sub in subject:
+
+        re_mask = re.compile('.*/'+exp+'/'+sub+'/'+angle+'($|/.*)')
+        results = [re_mask.search(str(path)).group(0) for path in paths_k if re_mask.search(str(path))]
+        
+        if len(results)>2:
+            # ims = np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))])
+            # images.append(np.asarray([cv2.imread(file) for file,_ in zip(results,range(3))]))
+            paths.append([file for file in results])
 
     return paths
