@@ -9,6 +9,8 @@ import gait
 from tqdm import tqdm
 import cv2
 
+OneRNN = False
+
 image_vec_shape = 12
 gait_key_poses = 16
 conditional_vec_shape = 4
