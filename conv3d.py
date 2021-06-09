@@ -62,46 +62,20 @@ class PEI(Dataset):
         self.ds = [] #Paths to all images d[0]=> subject 1  (len = num of frames for it)
         for i in range(num_exps):
             for j in range(len(keyposes)):
-                exp = ims(exp=i+1,angle=angle,paths_k=paths_k[j])
-                self.ds = self.ds + exp
-
-        
-
-    def __len__(self):
-
-        return len(self.ds)
-
-    def __getitem__(self, idx):
-
-        frames = np.asarray([preprocess(cv2.imread(im))/255. for im in self.ds[idx]]) #Shape: (3,160,120)
-        y = np.mean([image for image in frames],axis=0) #Shape (160,120)
-        mask = np.random.random(frames.shape[0])<0.5
-        frames[mask] = np.zeros((frames.shape[1],frames.shape[2]))
-        # X = self.occlude()
-        
-        
-        return frames.reshape(1,frames.shape[0],frames.shape[1],frames.shape[2]).astype('float32'),y.astype('float32')
-
-
-class Check(Dataset):
-
-    def __init__(self, num_exps=1,keyposes=[4], angle=0):
-        """
-        Custom dataset for images of a certain keypose at a given angle.
-
-        Args:
-            angle (int)     : Angle
-            keypose (list)  : Key-poses/Clusters
-            data_path (str) : Path where dataset is downloaded
-        """
-        paths_k = [sorted(get_keyposepath(cluster = i)) for i in keyposes]
-
-        self.ds = [] #Paths to all images d[0]=> subject 1  (len = num of frames for it)
-        for i in range(num_exps):
-            for j in range(len(keyposes)):
                 exp = check(exp=i+1,angle=angle,paths_k=paths_k[j])
                 self.ds = self.ds + exp
 
+        new = []
+        num = 3
+        for sub in self.ds:
+            if len(sub)>num:
+                temp = []
+                for i in range(len(sub)-num+1):
+                    new.append(sub[i:i+num])
+            else:
+                new.append(sub)
+        
+        self.ds = new
         
 
     def __len__(self):
