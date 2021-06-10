@@ -97,7 +97,7 @@ def main():
     history = model_BiRNN.fit(train_data, 
                               validation_data = valid_data, 
                               epochs=1000,
-                              use_multiprocessing=True
+                              use_multiprocessing=True,
                               workers=4)
     
     model_BiRNN.save("weights/BiRNN.h5")
