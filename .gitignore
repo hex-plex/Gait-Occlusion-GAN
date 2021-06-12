@@ -7,4 +7,7 @@ GaitDatasetB-silh/
 labels_cache.npz
 Kmeans_weights.npz
 time.ipynb
+Conv3D.ipynb
+checkPEI.ipynb
+encoder.ipynb
 __pycache__

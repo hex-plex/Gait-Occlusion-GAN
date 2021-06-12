@@ -87,8 +87,11 @@ class PEI(Dataset):
         frames = np.asarray([preprocess(cv2.imread(im))/255. for im in self.ds[idx]]) #Shape: (3,160,120)
         y = np.mean([image for image in frames],axis=0) #Shape (160,120)
         mask = np.random.random(frames.shape[0])<0.5
-        frames[mask] = np.zeros((frames.shape[1],frames.shape[2]))
-        # X = self.occlude()
+        if np.any(mask):
+            frames[mask] = np.zeros((frames.shape[1],frames.shape[2]))
+        else:
+            mask = np.unique(np.random.randint(len(frames),size=len(frames)-1))
+            frames[mask] = np.zeros((frames.shape[1],frames.shape[2]))
         
         
         return frames.reshape(1,frames.shape[0],frames.shape[1],frames.shape[2]).astype('float32'),y.astype('float32')
