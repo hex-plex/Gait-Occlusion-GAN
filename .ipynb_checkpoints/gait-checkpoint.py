@@ -17,19 +17,27 @@ def preprocess(img):
     else:
         return np.zeros((160,120))
 
-def get_feature_vectors(imgs,k=10):
-    G = np.vstack(tuple(preprocess(img).reshape(-1).astype(np.float64)/255. for img in imgs))
+def get_feature_vectors(imgs,k=10 , preproc = None, eigvec=None, eigvalue=None):
+    if preproc is None:
+        preproc = prerprocess
+    G = np.vstack(tuple(preproc(img).reshape(-1).astype(np.float64)/255. for img in imgs))
     avg = G.T.mean(axis=1)
     A = G.T-avg.reshape(-1,1)
-    X = A.T@A / A.shape[1]
-    eigvalue, eigvec = np.linalg.eigh(X)
+    info = {}
+    if eigvec is None:
+        X = A.T@A / A.shape[1]
+        eigvalue, eigvec = np.linalg.eigh(X)
+        info['eigvalue'] = eigvalue
+        info['eigvec'] = eigvec
+    else:
+        assert eigvalue is not None
     U = A@eigvec
     u = U/np.linalg.norm(U, axis=0)
     u_sorted = u[:,np.argsort(eigvalue)[::-1]]
     u_k = u_sorted[:,0:k]
     W = u_k.T@A
     A1 = u_k@W
-    return W, A1, A, u_k, avg
+    return W, A1, A, u_k, avg , info 
 
 class KMeans():
     def __init__(self, K = 16, debug=False):
@@ -142,57 +150,79 @@ def fetch_p_vec(key_poses,K,A_i,avg_i):
         PK.append(len(indicies)/len(key_poses))
     return np.asarray(PEI), np.asarray(PK)
 
-def fetch_data(subject=0,angle=90,noFrame=False):
-    subject = str(subject)
-    while len(subject)<3:
-        subject = '0'+subject
+def fetch_data(subject='nm-01',angle=90,noFrame=True , preFrame=True, returnName=False):
+    assert len(subject)>=5
     angle = str(angle)
     while len(angle)<3:
         angle = '0' + angle
     test_dataset = None if noFrame else []
-    test_preprocessed = []
-    for folder in sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh/'+subject)):
+    file_names = [] if returnName else None
+    test_preprocessed = [] if preFrame else None
+    for exp in sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh')):
         frames = None if noFrame else []
         pro_frames = []
+        file_names_sub = [] if returnName else None 
+        
         for file in sorted(
                 os.listdir(
                     '/'.join(
                         [os.getcwd(),
-                        'GaitDatasetB-silh/',
+                        'GaitDatasetB-silh',
+                        exp,
                         subject,
-                        folder,
                         angle]
                     )
                 )):
+            
+            if file[-3:]!="png":
+                continue
+                
             if not noFrame:
                 frames.append(
-                cv2.imread(
-                    '/'.join(
-                        [os.getcwd(),
-                        'GaitDatasetB-silh/',
-                        subject,
-                        folder,
-                        angle,
-                        file])
-                    )
-                )
-            pro_frames.append(
-                preprocess(
                     cv2.imread(
                         '/'.join(
                             [os.getcwd(),
-                            'GaitDatasetB-silh/',
+                            'GaitDatasetB-silh',
+                            exp,
                             subject,
-                            folder,
                             angle,
                             file]
-                            )
                         )
                     )
                 )
+                
+            if preFrame:
+                pro_frames.append(
+                    preprocess(
+                        cv2.imread(
+                            '/'.join(
+                                [os.getcwd(),
+                                'GaitDatasetB-silh',
+                                exp,
+                                subject,
+                                angle,
+                                file]
+                                )
+                            )
+                        )
+                    )
+            
+            if returnName:
+                file_names_sub.append(
+                    '/'.join(
+                            [os.getcwd(),
+                             'GaitDatasetB-silh',
+                             exp,
+                             subject,
+                             angle,
+                             file]
+                        )
+                )
+            
         if not noFrame:test_dataset.append(np.array(frames))
-        test_preprocessed.append(np.moveaxis(np.array(pro_frames),0,-1))
-    return test_dataset, test_preprocessed
+        if returnName:file_names.append(np.array(file_names_sub))
+        if preFrame: test_preprocessed.append(np.moveaxis(np.array(pro_frames),0,-1))
+    return test_dataset, test_preprocessed, file_names
 
 def supervision(kmeans, angle_subject=None, override=False):
     """
