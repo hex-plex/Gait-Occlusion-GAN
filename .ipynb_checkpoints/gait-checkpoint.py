@@ -37,7 +37,7 @@ def get_feature_vectors(imgs,k=10 , preproc = None, eigvec=None, eigvalue=None):
     u_k = u_sorted[:,0:k]
     W = u_k.T@A
     A1 = u_k@W
-    return W, A1, A, u_k, avg , info 
+    return W, A1, A, u_k, avg, info 
 
 class KMeans():
     def __init__(self, K = 16, debug=False):

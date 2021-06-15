@@ -34,8 +34,6 @@ for i in range(len(labels)):
     y.append(i*np.ones((len(pr_imgs[i],))))
 datasetImgs = np.concatenate(pro_imgs, axis=0)
     
-datasetImgs = np.concatenate(pr_imgs, axis=0)
-
 X, _, _, _, _, info = gait.get_feature_vectors(datasetImgs,preproc=lambda x:x)
 
 eigvec, eigvalue = info['eigvec'], info['eigvalue']
