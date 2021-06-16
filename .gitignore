@@ -1,6 +1,6 @@
 gan/
-weights/*
 data/*
+weights/model_109600.h5
 prev/
 GaitDatasetB-silh.zip
 GaitDatasetB-silh/
