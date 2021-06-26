@@ -19,7 +19,7 @@ def preprocess(img):
 
 def get_feature_vectors(imgs,k=10 , preproc = None, eigvec=None, eigvalue=None):
     if preproc is None:
-        preproc = prerprocess
+        preproc = preprocess
     G = np.vstack(tuple(preproc(img).reshape(-1).astype(np.float64)/255. for img in imgs))
     avg = G.T.mean(axis=1)
     A = G.T-avg.reshape(-1,1)
@@ -316,39 +316,39 @@ def fetch_labels(label_angle=None,filename="labels_cache",save=True,override=Fal
 def encode_data(encoder,label_angle=None,save=True,override=False):
     info = {}
     for folder in tqdm(sorted(os.listdir(os.getcwd()+'/GaitDatasetB-silh'))):
-            for subfolder in sorted(os.listdir('/'.join([os.getcwd(), 'GaitDatasetB-silh', folder]))):
-                if label_angle is None:
-                    angle_set = sorted(os.listdir('/'.join([os.getcwd(), 'GaitDatasetB-silh',folder,subfolder])))
-                else:
-                    angle_set = [label_angle]
-                for angle in angle_set:
-                    label_file = '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'labels.pkl'])
-                    enc_file = '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'enc_vec.npy'])
-                    if (override or not os.path.isfile(enc_file)) and os.path.isfile(label_file):
-                        labels = pickle.load(open(label_file, 'rb'))
-                        labels_temp = list(enumerate(labels))
-                        images = []
-                        enc_vec = []
-                        for file in sorted(os.listdir('/'.join([os.getcwd(),'GaitDatasetB-silh', folder, subfolder, angle]))):
-                            if file[-3:]!="pkl" and file[-3:]!="npy":
-                                file_name = '/'.join([os.getcwd(), 'GaitDatasetB-silh', folder, subfolder, angle, file])
-                                images.append(cv2.copyMakeBorder(preprocess(cv2.imread(file_name)), 0, 0, 20, 20, cv2.BORDER_CONSTANT, (0,0,0)).reshape(160,160,1)/255.)
-                        for j in range(int(np.ceil(len(labels_temp)/50.0))):
-                            
-                            imgs = np.zeros((50,160,160,1))
-                            z = np.zeros((50),dtype=int)
-                            for i, (global_i, file) in enumerate(labels_temp[50*j : min(50*(j+1), len(labels_temp)-1)]):
-                                #print(i,global_i)
-                                imgs[i,] = images[global_i]
-                                z[i] = labels[file]
-                            z_vec = keras.utils.to_categorical(z,num_classes=16)
-                            enc_vec.append(encoder.predict([imgs, z_vec ], batch_size=50))
-                        enc_vec = np.array(enc_vec).reshape(-1,16)[:len(labels_temp),:]
-                        info['/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle])] = enc_vec
-                        if save:
-                            np.save('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'enc_vec']),enc_vec)
-                    elif os.path.isfile(enc_file):
-                        info['/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle])] = np.load(enc_file)
+        for subfolder in sorted(os.listdir('/'.join([os.getcwd(), 'GaitDatasetB-silh', folder]))):
+            if label_angle is None:
+                angle_set = sorted(os.listdir('/'.join([os.getcwd(), 'GaitDatasetB-silh',folder,subfolder])))
+            else:
+                angle_set = [label_angle]
+            for angle in angle_set:
+                label_file = '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'labels.pkl'])
+                enc_file = '/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'enc_vec.npy'])
+                if (override or not os.path.isfile(enc_file)) and os.path.isfile(label_file):
+                    labels = pickle.load(open(label_file, 'rb'))
+                    labels_temp = list(enumerate(labels))
+                    images = []
+                    enc_vec = []
+                    for file in sorted(os.listdir('/'.join([os.getcwd(),'GaitDatasetB-silh', folder, subfolder, angle]))):
+                        if file[-3:]!="pkl" and file[-3:]!="npy":
+                            file_name = '/'.join([os.getcwd(), 'GaitDatasetB-silh', folder, subfolder, angle, file])
+                            images.append(cv2.copyMakeBorder(preprocess(cv2.imread(file_name)), 0, 0, 20, 20, cv2.BORDER_CONSTANT, (0,0,0)).reshape(160,160,1)/255.)
+                    for j in range(int(np.ceil(len(labels_temp)/50.0))):
+
+                        imgs = np.zeros((50,160,160,1))
+                        z = np.zeros((50),dtype=int)
+                        for i, (global_i, file) in enumerate(labels_temp[50*j : min(50*(j+1), len(labels_temp)-1)]):
+                            #print(i,global_i)
+                            imgs[i,] = images[global_i]
+                            z[i] = labels[file]
+                        z_vec = keras.utils.to_categorical(z,num_classes=16)
+                        enc_vec.append(encoder.predict([imgs, z_vec ], batch_size=50))
+                    enc_vec = np.array(enc_vec).reshape(-1,16)[:len(labels_temp),:]
+                    info['/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle])] = enc_vec
+                    if save:
+                        np.save('/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle,'enc_vec']),enc_vec)
+                elif os.path.isfile(enc_file):
+                    info['/'.join([os.getcwd(),'GaitDatasetB-silh',folder,subfolder,angle])] = np.load(enc_file)
     return info
 
 def encoded2timeseries(encoded_data, timestep=3, y_out = True):
