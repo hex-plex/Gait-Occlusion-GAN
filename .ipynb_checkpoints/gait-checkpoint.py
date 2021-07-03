@@ -8,6 +8,7 @@ import keras
 
 def preprocess(img):
     cnt, heir = cv2.findContours(img[:,:,0],cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+    cnt = sorted(cnt, key=cv2.contourArea)[::-1]
     if (len(cnt)>0):
         x,y,w,h = cv2.boundingRect(cnt[0])
         temp = img[y:y+h, x:x+w, 0]
