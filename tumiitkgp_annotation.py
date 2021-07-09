@@ -46,12 +46,16 @@ def main(argv):
         print(vid_file)
         info = {}
         subject = vid_file.split('.')[0]
-        if not os.path.isdir('/'.join([FLAGS.dataset, subject])):
+        if os.path.isdir('/'.join([FLAGS.dataset, subject])):
+            print("Skipping annotation done")
+            continue
+        else :   
             os.mkdir('/'.join([FLAGS.dataset, subject]))
         cap = cv2.VideoCapture( '/'.join([FLAGS.dataset, vid_file]) )
         ret, nxt = cap.read()
         cnt = 1
         file = str(cnt).zfill(6) + ".png"
+       
         while ret:
             r = cv2.selectROI(nxt)
             if r[2]>0 and r[3]>0:
@@ -89,7 +93,7 @@ def main(argv):
                 cv2.destroyWindow('frame')
             ret, nxt = cap.read()
               
-        with open('/'.join([FLAGS.dataset, subject, 'info.pkl'])):
+        with open('/'.join([FLAGS.dataset, subject, 'info.pkl']), 'wb') as handle:
             pickle.dump(info, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 if __name__=="__main__":
