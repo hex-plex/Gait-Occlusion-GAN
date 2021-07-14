@@ -7,3 +7,7 @@ GaitDatasetB-silh/
 labels_cache.npz
 Kmeans_weights.npz
 __pycachc__/
+OULP-C1V2_Pack/
+TreadmillDatasetA/
+TreadmillDatasetB/
+tumiitgait/
