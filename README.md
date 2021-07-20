@@ -8,6 +8,8 @@ This work proposes simple BiDirectional Filtering of the latent vectors of The s
 The Conversion of the Spatio Data to latent space was done using a  conditional Variational AutoEncoder.
 We have used a 3 Datasets : for training 2 namely, CASIA-B, OU-ISIR large population, and testing 1 namely, TumIITKGP.
 
+*A conditional GAN based approach is also been presented in code*
+
 ## Proposed approach
 
 We have used a Model based approach for feature extraction using **Temporally constrained Kmeans Clustering** and **Short Path in a Weighted Graph** for assigning Keypose for the Sequence even in case of Occlusion. This achieved substantially better results
