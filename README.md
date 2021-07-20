@@ -28,7 +28,7 @@ Propoesed Approach
 
 <p align="center">
 <img heigth="300" src="results/7333occlu.jpg"/>
-Visual inspection of Reconstruction for a sequence with over 73 occlusion.
+Visual inspection of Reconstruction for a sequence with over 73 occlusion.<br/>
 (a) Input Sequence<br/>
 (b) Reconstructed Sequence<br/>
 (c) Ground Truth<br/>
