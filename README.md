@@ -27,11 +27,11 @@ Propoesed Approach
 ## Results
 
 <p align="center">
-<img src="results/733occlu.jpg"/>
+<img heigth="300" src="results/7333occlu.jpg"/>
 Visual inspection of Reconstruction for a sequence with over 73 occlusion.
-(a) Input Sequence
-(b) Reconstructed Sequence
-(c) Ground Truth
+(a) Input Sequence<br/>
+(b) Reconstructed Sequence<br/>
+(c) Ground Truth<br/>
   
 Successfully able to Reconstruct 22 Frames from just 8 Frames with a Dice score 0.98
 </p>
